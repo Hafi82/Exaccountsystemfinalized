@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excellence Graphics - Account Management</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>Excellence<br><span>Graphics</span></h2>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-section="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </li>
+                <li data-section="customers">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Customers</span>
+                </li>
+                <li data-section="invoices">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    <span>Invoices</span>
+                </li>
+                <li data-section="reports">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Reports</span>
+                </li>
+            </ul>
+            <div class="nav-footer">
+                <button id="backupBtn" class="btn-secondary small"><i class="fa-solid fa-download"></i> Backup Data</button>
+                <input type="file" id="restoreInput" accept=".json" style="display: none;">
+                <button id="restoreBtn" class="btn-secondary small"><i class="fa-solid fa-upload"></i> Restore</button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header>
+                <h1 id="page-title">Dashboard</h1>
+                <div class="user-profile">
+                    <span>Admin</span>
+                    <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                </div>
+            </header>
+
+            <!-- Sections -->
+            
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <div class="stats-grid">
+                    <div class="stat-card income">
+                        <div class="icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                        <div class="info">
+                            <h3>Total Income</h3>
+                            <p id="dash-total-income">LKR 0.00</p>
+                        </div>
+                    </div>
+                    <div class="stat-card expenses">
+                        <div class="icon"><i class="fa-solid fa-arrow-trend-down"></i></div>
+                        <div class="info">
+                            <h3>Outstanding</h3>
+                            <p id="dash-outstanding">LKR 0.00</p>
+                        </div>
+                    </div>
+                    <div class="stat-card customers">
+                        <div class="icon"><i class="fa-solid fa-user-plus"></i></div>
+                        <div class="info">
+                            <h3>New Customers</h3>
+                            <p id="dash-new-customers">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="charts-container">
+                    <div class="chart-wrapper">
+                        <h3>Income Overview</h3>
+                        <canvas id="incomeChart"></canvas>
+                    </div>
+                    <div class="recent-activity">
+                        <h3>Recent Invoices</h3>
+                        <ul id="recent-invoices-list">
+                            <!-- Populated by JS -->
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Customers Section -->
+            <section id="customers" class="section">
+                <div class="action-bar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="customer-search" placeholder="Search customers...">
+                    </div>
+                    <button id="add-customer-btn" class="btn-primary"><i class="fa-solid fa-plus"></i> Add Customer</button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Contact</th>
+                                <th>Address</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customer-list">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Invoices Section -->
+            <section id="invoices" class="section">
+                <div class="action-bar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="invoice-search" placeholder="Search invoices...">
+                    </div>
+                    <button id="create-invoice-btn" class="btn-primary"><i class="fa-solid fa-plus"></i> Create Invoice</button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" data-filter="all">All</button>
+                    <button class="tab-btn" data-filter="paid">Paid</button>
+                    <button class="tab-btn" data-filter="partial">Partial</button>
+                    <button class="tab-btn" data-filter="unpaid">Unpaid</button>
+                    <button class="tab-btn" data-filter="overdue">Overdue</button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Paid</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoice-list">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports" class="section">
+                <div class="report-controls">
+                    <select id="report-period">
+                        <option value="daily">Daily</option>
+                        <option value="monthly" selected>Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                    <button id="export-report-btn" class="btn-secondary"><i class="fa-solid fa-file-export"></i> Export CSV</button>
+                </div>
+                
+                <div class="report-summary">
+                    <div class="summary-card">
+                        <h4>Total Sales</h4>
+                        <p id="report-total-sales">LKR 0.00</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Net Income</h4>
+                        <p id="report-net-income">LKR 0.00</p>
+                    </div>
+                </div>
+
+                <div class="charts-container full-width">
+                    <canvas id="salesReportChart"></canvas>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modals -->
+    
+    <!-- Add/Edit Customer Modal -->
+    <div id="customer-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="customer-modal-title">Add Customer</h2>
+            <form id="customer-form">
+                <input type="hidden" id="customer-id">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="customer-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="customer-phone">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="customer-email">
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea id="customer-address" rows="2"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary close-modal-btn">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Customer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Invoice Modal -->
+    <div id="invoice-modal" class="modal large-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>New Invoice</h2>
+            <form id="invoice-form">
+                <div class="invoice-header-grid">
+                    <div class="form-group">
+                        <label>Customer</label>
+                        <select id="invoice-customer" required>
+                            <option value="">Select Customer</option>
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="invoice-date" required>
+                    </div>
+                </div>
+
+                <div class="invoice-items-container">
+                    <table class="invoice-items-table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th width="100">Qty</th>
+                                <th width="150">Price</th>
+                                <th width="150">Total</th>
+                                <th width="50"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoice-items-list">
+                            <!-- Items go here -->
+                        </tbody>
+                    </table>
+                    <button type="button" id="add-item-btn" class="btn-secondary small"><i class="fa-solid fa-plus"></i> Add Item</button>
+                </div>
+
+                <div class="invoice-footer-grid">
+                    <div class="notes-section">
+                        <label>Notes</label>
+                        <textarea id="invoice-notes" placeholder="Thank you for your business!"></textarea>
+                    </div>
+                    <div class="totals-section">
+                        <div class="total-row">
+                            <span>Subtotal:</span>
+                            <span id="invoice-subtotal">0.00</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Discount:</span>
+                            <div class="discount-input">
+                                <input type="number" id="invoice-discount-val" value="0" min="0">
+                                <select id="invoice-discount-type">
+                                    <option value="fixed">LKR</option>
+                                    <option value="percent">%</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="total-row grand-total">
+                            <span>Total:</span>
+                            <span id="invoice-total">0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary close-modal-btn">Cancel</button>
+                    <button type="submit" class="btn-primary">Generate Invoice</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Record Payment</h2>
+            <div class="payment-info">
+                <p>Invoice: <span id="pay-invoice-id">#</span></p>
+                <p>Total Amount: <span id="pay-total-amount">0.00</span></p>
+                <p>Balance Due: <span id="pay-balance-due" class="highlight">0.00</span></p>
+            </div>
+            <form id="payment-form">
+                <input type="hidden" id="pay-invoice-idx">
+                <div class="form-group">
+                    <label>Payment Amount</label>
+                    <input type="number" id="pay-amount" step="0.01" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary close-modal-btn">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
